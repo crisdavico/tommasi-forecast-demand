@@ -1,0 +1,8 @@
+# Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local AI runtime state
+.atl/
+.gentle-ai-instance
