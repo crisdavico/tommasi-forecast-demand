@@ -1,6 +1,6 @@
 {
     "name": "Tommasi Forecast Demand",
-    "version": "15.0.6.2.0",
+    "version": "15.0.6.2.2",
     "category": "Inventory/Product",
     "summary": "MCP tool returning paginated sold-storable demand envelopes",
     "author": "Eynes SRL",

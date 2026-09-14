@@ -62,6 +62,13 @@ class TestForecastAgentConfig(TransactionCase):
         rec.write({"assistant_id": "asst_stored_only"})
         self.assertEqual(rec.assistant_id, "asst_stored_only")
 
+    def test_read_timeout_allows_nine_hundred_seconds(self):
+        """Large forecasts may use the supported 900-second ceiling."""
+        rec = self._model().create(self._vals(read_timeout=900))
+        self.assertEqual(rec.read_timeout, 900)
+        with self.assertRaises(ValidationError):
+            rec.write({"read_timeout": 901})
+
     def test_copy_omits_secrets(self):
         """Duplicating a config must not copy api_key or hmac_secret."""
         rec = self._model().create(self._vals())

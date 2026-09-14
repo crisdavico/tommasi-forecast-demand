@@ -266,10 +266,26 @@ class TommasiForecastAgentRun(models.Model):
 
     @api.model
     def _cron_process_forecast_runs(self):
-        """Cron entry: commit claimed rows, then process each run in memory."""
+        """Cron entry: claim and process each run on committed fresh cursors."""
         claimed_ids = self._claim_due_runs_committed(limit=CLAIM_LIMIT)
-        for run in self.browse(claimed_ids).exists():
-            run._process_run()
+        for run_id in claimed_ids:
+            self._process_run_committed(run_id)
+
+    @api.model
+    def _process_run_committed(self, run_id):
+        """Process a claimed run on a cursor that can see the committed claim."""
+        cr = self.env.registry.cursor()
+        try:
+            env = api.Environment(cr, SUPERUSER_ID, dict(self.env.context))
+            run = env[self._name].browse(run_id).exists()
+            if run:
+                run._process_run()
+            cr.commit()
+        except Exception:
+            cr.rollback()
+            raise
+        finally:
+            cr.close()
 
     def _process_run(self):
         """POST via the HMAC helper and map retryable vs terminal statuses."""

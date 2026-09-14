@@ -2,9 +2,9 @@
 
 import json
 from datetime import timedelta
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 
-from odoo import fields
+from odoo import SUPERUSER_ID, fields
 from odoo.exceptions import UserError
 from odoo.tests import tagged
 from odoo.tests.common import TransactionCase
@@ -12,6 +12,9 @@ from odoo.tests.common import TransactionCase
 SECRET_API_KEY = "tfd-run-api-key-41c8e0aa"
 SECRET_HMAC = "tfd-run-hmac-secret-90b2d11c"
 POST_PATH = "odoo.addons.tommasi_forecast_demand.models.forecast_agent_hmac.requests.post"
+ENVIRONMENT_PATH = (
+    "odoo.addons.tommasi_forecast_demand.models.forecast_agent_run.api.Environment"
+)
 
 
 @tagged("post_install", "-at_install")
@@ -86,6 +89,53 @@ class TestForecastAgentRun(TransactionCase):
         claimed_again = Run._claim_due_runs(limit=5)
         self.assertEqual(claimed_again, due[5])
         self.assertEqual(due[5].state, "running")
+
+    def test_cron_processes_claimed_runs_on_committed_cursors(self):
+        """Cron must not process side-cursor claims through its old snapshot."""
+        Run = self._run_model()
+        with patch.object(
+            type(Run),
+            "_claim_due_runs_committed",
+            return_value=[41, 42],
+        ) as mock_claim, patch.object(
+            type(Run),
+            "_process_run_committed",
+        ) as mock_process:
+            Run._cron_process_forecast_runs()
+
+        mock_claim.assert_called_once_with(limit=5)
+        self.assertEqual(mock_process.call_args_list, [call(41), call(42)])
+
+    def test_process_run_committed_uses_fresh_cursor(self):
+        """The processor must read the claimed running state after its commit."""
+        Run = self._run_model()
+        cr = MagicMock()
+        fresh_run = MagicMock()
+        fresh_model = MagicMock()
+        fresh_model.browse.return_value.exists.return_value = fresh_run
+        fresh_env = MagicMock()
+        fresh_env.__getitem__.return_value = fresh_model
+
+        with patch.object(
+            self.env.registry,
+            "cursor",
+            return_value=cr,
+        ) as mock_cursor, patch(
+            ENVIRONMENT_PATH,
+            return_value=fresh_env,
+        ) as mock_environment:
+            Run._process_run_committed(178)
+
+        mock_cursor.assert_called_once_with()
+        environment_args = mock_environment.call_args.args
+        self.assertIs(environment_args[0], cr)
+        self.assertEqual(environment_args[1], SUPERUSER_ID)
+        fresh_env.__getitem__.assert_called_once_with(Run._name)
+        fresh_model.browse.assert_called_once_with(178)
+        fresh_run._process_run.assert_called_once_with()
+        cr.commit.assert_called_once_with()
+        cr.rollback.assert_not_called()
+        cr.close.assert_called_once_with()
 
     def test_stale_running_recovered(self):
         """Running past read_timeout+60s is recovered as retry or failed."""
