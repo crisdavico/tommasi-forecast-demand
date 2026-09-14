@@ -217,7 +217,9 @@ Secrets, rotation, plaintext at rest
 
 ``api_key`` and ``hmac_secret`` are stored as ordinary Odoo fields:
 plaintext in Postgres and in backups. Edge Fernet encryption does **not**
-protect these Odoo columns. Restrict ``llm.group_llm_manager``.
+protect these Odoo columns. Restrict ``llm.group_llm_manager``. The
+Inventory Forecast group can queue runs but cannot read ``api_key`` or
+``hmac_secret``.
 
 Rotate after the edge row exists (and after any suspected leak):
 

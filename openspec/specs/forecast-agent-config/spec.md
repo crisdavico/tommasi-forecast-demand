@@ -73,7 +73,7 @@ The config MAY store `assistant_id`. A config without `assistant_id` MUST remain
 
 ### Requirement: Manager-Only Access
 
-Only members of `llm.group_llm_manager` MUST create, read, write, or unlink config records.
+Only members of `llm.group_llm_manager` MUST create, write, or unlink config records. Members of `tommasi_forecast_demand.group_tommasi_forecast` MAY read non-secret config fields so they can queue runs from Inventory. `api_key` and `hmac_secret` MUST remain readable only by `llm.group_llm_manager`.
 
 #### Scenario: Manager CRUD
 
@@ -81,9 +81,17 @@ Only members of `llm.group_llm_manager` MUST create, read, write, or unlink conf
 - WHEN they manage config for an allowed company
 - THEN they SHALL create, read, write, and unlink that company's row
 
+#### Scenario: Forecast operator read-only
+
+- GIVEN a user in `tommasi_forecast_demand.group_tommasi_forecast` and not in `llm.group_llm_manager`
+- WHEN they search or read config
+- THEN they SHALL read non-secret fields for allowed companies
+- AND they MUST NOT write config
+- AND they MUST NOT read `api_key` or `hmac_secret`
+
 #### Scenario: Non-manager denied
 
-- GIVEN a user not in `llm.group_llm_manager`
+- GIVEN a user not in `llm.group_llm_manager` or `tommasi_forecast_demand.group_tommasi_forecast`
 - WHEN they search or read config
 - THEN the system MUST deny access
 

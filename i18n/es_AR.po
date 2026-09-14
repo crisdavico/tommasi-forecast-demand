@@ -138,8 +138,17 @@ msgstr "Finalizado"
 #. module: tommasi_forecast_demand
 #: model:ir.ui.menu,name:tommasi_forecast_demand.menu_tommasi_forecast
 #: model:ir.ui.menu,name:tommasi_forecast_demand.menu_tommasi_forecast_llm
+#: model:res.groups,name:tommasi_forecast_demand.group_tommasi_forecast
 msgid "Forecast"
 msgstr "Pronóstico"
+
+#. module: tommasi_forecast_demand
+#: model:res.groups,comment:tommasi_forecast_demand.group_tommasi_forecast
+msgid ""
+"See the Forecast menu in Inventory and run or review forecast agent jobs."
+msgstr ""
+"Ver el menú Pronóstico en Inventario y ejecutar o revisar las ejecuciones del "
+"agente de pronóstico."
 
 #. module: tommasi_forecast_demand
 #: model:ir.actions.act_window,name:tommasi_forecast_demand.action_tommasi_forecast_agent_config

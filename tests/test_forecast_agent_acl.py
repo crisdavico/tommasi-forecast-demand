@@ -104,7 +104,7 @@ class TestForecastAgentAcl(TransactionCase):
         self.assertFalse(Config.search([("id", "=", rec.id)]))
 
     def test_non_manager_denied(self):
-        """Users without llm.group_llm_manager cannot search or read config."""
+        """Users without Forecast or LLM Manager cannot search or read config."""
         user = new_test_user(
             self.env,
             login="tfd_forecast_user",
@@ -239,10 +239,21 @@ class TestForecastAgentAcl(TransactionCase):
         )
         self.assertEqual(run_forecast_menu.parent_id, forecast_menu)
         self.assertEqual(run_forecast_menu.action, wizard_action)
+        forecast_group = self.env.ref("tommasi_forecast_demand.group_tommasi_forecast")
+        llm_manager = self.env.ref("llm.group_llm_manager")
+        self.assertEqual(forecast_menu.groups_id, forecast_group)
+        self.assertEqual(run_forecast_menu.groups_id, forecast_group)
+        self.assertEqual(menu.groups_id, forecast_group)
+        self.assertNotIn(llm_manager, forecast_menu.groups_id)
         llm_run_forecast_menu = self.env.ref(
             "tommasi_forecast_demand.menu_tommasi_forecast_agent_run_forecast_llm"
         )
         self.assertEqual(llm_run_forecast_menu.action, wizard_action)
+        llm_forecast_menu = self.env.ref(
+            "tommasi_forecast_demand.menu_tommasi_forecast_llm"
+        )
+        self.assertEqual(llm_forecast_menu.groups_id, llm_manager)
+        self.assertNotIn(forecast_group, llm_forecast_menu.groups_id)
         config_menu = self.env.ref(
             "tommasi_forecast_demand.menu_tommasi_forecast_agent_config"
         )
@@ -252,11 +263,18 @@ class TestForecastAgentAcl(TransactionCase):
         )
 
     def test_wizard_manager_only(self):
-        """Non-managers cannot open the wizard; managers can."""
+        """Internal users cannot open the wizard; LLM managers and Forecast can."""
         manager = new_test_user(
             self.env,
             login="tfd_forecast_wiz_mgr",
             groups="llm.group_llm_manager",
+            company_id=self.env.company.id,
+            company_ids=[(6, 0, [self.env.company.id])],
+        )
+        forecast_user = new_test_user(
+            self.env,
+            login="tfd_forecast_wiz_operator",
+            groups="tommasi_forecast_demand.group_tommasi_forecast",
             company_id=self.env.company.id,
             company_ids=[(6, 0, [self.env.company.id])],
         )
@@ -270,6 +288,35 @@ class TestForecastAgentAcl(TransactionCase):
             Wizard.with_user(user).create({})
         wizard = Wizard.with_user(manager).create({})
         self.assertTrue(wizard.exists())
+        forecast_wizard = Wizard.with_user(forecast_user).create({})
+        self.assertTrue(forecast_wizard.exists())
+
+    def test_forecast_group_runs_inventory_actions(self):
+        """Forecast group can queue a run and cannot change agent config."""
+        config = self._model().create(self._vals())
+        user = new_test_user(
+            self.env,
+            login="tfd_forecast_operator",
+            groups="tommasi_forecast_demand.group_tommasi_forecast",
+            company_id=self.env.company.id,
+            company_ids=[(6, 0, [self.env.company.id])],
+        )
+        Wizard = self.env["tommasi.forecast.agent.run.wizard"].with_user(user)
+        action = Wizard.create({}).action_confirm()
+        self.assertEqual(action["res_model"], "tommasi.forecast.agent.run")
+        run = self._run_model().with_user(user).browse(action["res_id"])
+        self.assertEqual(run.state, "queued")
+        self.assertEqual(run.company_id, self.env.company)
+        Config = self._model().with_user(user)
+        self.assertEqual(Config.search([("id", "=", config.id)]), config)
+        with self.assertRaises(AccessError):
+            config.with_user(user).write({"edge_url": "https://edge-denied.example.test"})
+        config_data = Config.browse(config.id).read(
+            ["edge_url", "api_key", "hmac_secret"]
+        )[0]
+        self.assertEqual(config_data["edge_url"], config.edge_url)
+        self.assertNotIn("api_key", config_data)
+        self.assertNotIn("hmac_secret", config_data)
 
     def test_run_other_company_and_non_manager_denied(self):
         """Other-company managers and non-managers cannot search or read runs."""

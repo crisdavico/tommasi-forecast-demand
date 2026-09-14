@@ -29,7 +29,7 @@
         <field name="view_id" ref="view_tommasi_forecast_agent_run_wizard_form" />
         <field
             name="groups_id"
-            eval="[(4, ref('llm.group_llm_manager'))]"
+            eval="[(4, ref('llm.group_llm_manager')), (4, ref('group_tommasi_forecast'))]"
         />
     </record>
 
@@ -240,7 +240,7 @@
         <field name="view_mode">tree,form</field>
         <field
             name="groups_id"
-            eval="[(4, ref('llm.group_llm_manager'))]"
+            eval="[(4, ref('llm.group_llm_manager')), (4, ref('group_tommasi_forecast'))]"
         />
     </record>
 
@@ -280,7 +280,7 @@
         name="Forecast"
         parent="stock.menu_stock_root"
         sequence="30"
-        groups="llm.group_llm_manager"
+        groups="group_tommasi_forecast"
     />
     <menuitem
         id="menu_tommasi_forecast_agent_run_forecast"
@@ -288,7 +288,7 @@
         parent="menu_tommasi_forecast"
         action="action_tommasi_forecast_agent_run_wizard"
         sequence="10"
-        groups="llm.group_llm_manager"
+        groups="group_tommasi_forecast"
     />
     <menuitem
         id="menu_tommasi_forecast_agent_run"
@@ -296,6 +296,6 @@
         parent="menu_tommasi_forecast"
         action="action_tommasi_forecast_agent_run"
         sequence="20"
-        groups="llm.group_llm_manager"
+        groups="group_tommasi_forecast"
     />
 </odoo>

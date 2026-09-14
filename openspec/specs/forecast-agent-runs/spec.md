@@ -77,7 +77,7 @@ Cancel MUST apply only to `queued`, `running`, or `retry` and MUST stop further 
 
 ### Requirement: Manager Diagnostics Isolation and Sanitized Payloads
 
-Only `llm.group_llm_manager` MUST access runs. Forms MUST present status, output, timing, and diagnostics as read-only. Search and read MUST be company-scoped. Listing MUST NOT introduce a pagination contract. Stored payloads MUST be sanitized and MUST NOT include secrets.
+Only `llm.group_llm_manager` and `tommasi_forecast_demand.group_tommasi_forecast` MUST access runs. The Inventory Forecast menu MUST be visible only to `group_tommasi_forecast`. Forms MUST present status, output, timing, and diagnostics as read-only. Search and read MUST be company-scoped. Listing MUST NOT introduce a pagination contract. Stored payloads MUST be sanitized and MUST NOT include secrets.
 
 #### Scenario: Manager views run
 

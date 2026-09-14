@@ -43,8 +43,12 @@ class TommasiForecastAgentConfig(models.Model):
     active = fields.Boolean(default=True)
     edge_url = fields.Char(string="Edge URL", required=True)
     assistant_id = fields.Char(string="Assistant ID")
-    api_key = fields.Char(string="API Key", copy=False)
-    hmac_secret = fields.Char(string="HMAC Secret", copy=False)
+    api_key = fields.Char(
+        string="API Key", copy=False, groups="llm.group_llm_manager"
+    )
+    hmac_secret = fields.Char(
+        string="HMAC Secret", copy=False, groups="llm.group_llm_manager"
+    )
     connect_timeout = fields.Integer(default=5)
     read_timeout = fields.Integer(default=120)
     max_attempts = fields.Integer(default=5)

@@ -1,4 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_tommasi_forecast_agent_config_manager,tommasi.forecast.agent.config.manager,model_tommasi_forecast_agent_config,llm.group_llm_manager,1,1,1,1
+access_tommasi_forecast_agent_config_forecast,tommasi.forecast.agent.config.forecast,model_tommasi_forecast_agent_config,group_tommasi_forecast,1,0,0,0
 access_tommasi_forecast_agent_run_manager,tommasi.forecast.agent.run.manager,model_tommasi_forecast_agent_run,llm.group_llm_manager,1,1,1,1
+access_tommasi_forecast_agent_run_forecast,tommasi.forecast.agent.run.forecast,model_tommasi_forecast_agent_run,group_tommasi_forecast,1,1,1,1
 access_tommasi_forecast_agent_run_wizard_manager,tommasi.forecast.agent.run.wizard.manager,model_tommasi_forecast_agent_run_wizard,llm.group_llm_manager,1,1,1,1
+access_tommasi_forecast_agent_run_wizard_forecast,tommasi.forecast.agent.run.wizard.forecast,model_tommasi_forecast_agent_run_wizard,group_tommasi_forecast,1,1,1,1
