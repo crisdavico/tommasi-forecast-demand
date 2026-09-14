@@ -225,10 +225,23 @@ class TestForecastAgentAcl(TransactionCase):
         self.env.ref(
             "tommasi_forecast_demand.action_server_tommasi_forecast_agent_run_forecast"
         )
-        menu = self.env.ref("tommasi_forecast_demand.menu_tommasi_forecast_agent_run")
+        forecast_menu = self.env.ref("tommasi_forecast_demand.menu_tommasi_forecast")
         self.assertEqual(
-            menu.parent_id,
-            self.env.ref("stock.menu_warehouse_report"),
+            forecast_menu.parent_id,
+            self.env.ref("stock.menu_stock_root"),
+        )
+        menu = self.env.ref("tommasi_forecast_demand.menu_tommasi_forecast_agent_run")
+        self.assertEqual(menu.parent_id, forecast_menu)
+        run_forecast_menu = self.env.ref(
+            "tommasi_forecast_demand.menu_tommasi_forecast_agent_run_forecast"
+        )
+        self.assertEqual(run_forecast_menu.parent_id, forecast_menu)
+        config_menu = self.env.ref(
+            "tommasi_forecast_demand.menu_tommasi_forecast_agent_config"
+        )
+        self.assertEqual(
+            config_menu.parent_id,
+            self.env.ref("llm.menu_llm_config"),
         )
 
     def test_run_other_company_and_non_manager_denied(self):

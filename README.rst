@@ -3,9 +3,14 @@ Tommasi Forecast Demand
 =======================
 
 Exposes an MCP tool that returns a versioned, paginated envelope of storable
-products sold on confirmed sales orders, with live on-hand quantity and 12
-dense 30-day demand periods. This 15.0.3.0.0 contract is **breaking**: callers
-that expected 18 periods must be upgraded.
+products sold on confirmed sales orders, with live on-hand quantity, 12
+dense 30-day demand periods, and nested ``alternative_products``. This
+15.0.4.0.0 contract is **breaking** for company isolation: callers that
+expected one-company isolation must be upgraded. Demand and stock are
+now summed across all companies. Version ``15.0.6.0.0`` is additive:
+``schema_version`` stays ``1`` and each product row includes nested
+``alternative_products``. The forecast agent treats that list as
+informational only (buy math still uses primary ``qty_available``).
 
 Depends
 =======
@@ -13,6 +18,8 @@ Depends
 * ``llm_tool``
 * ``llm_mcp_server``
 * ``sale_stock``
+* ``website_sale`` (direct depend as of ``15.0.6.0.0``; directional
+  ``product.template.alternative_product_ids``)
 
 MCP tool
 ========
@@ -45,6 +52,14 @@ A JSON object (not a bare list)::
           "default_code": "SKU",
           "name": "Name",
           "qty_available": 10.0,
+          "alternative_products": [
+            {
+              "id": 9,
+              "name": "Alt template",
+              "skus": ["ALT-A", "ALT-B"],
+              "qty_available": 12.0
+            }
+          ],
           "periods": [
             {
               "start": "...",
@@ -66,8 +81,9 @@ Eligibility
   not live ``now()`` after freeze.
 * Non-empty trimmed ``default_code`` (empty, ``False``, and whitespace-only
   codes are dropped).
-* Exactly one ``company_id``: the authenticated company. Orders and stock of
-  other companies are excluded.
+* Search is **not** scoped to the caller's company. Eligibility, demand, and
+  on-hand quantities include every company, even when the user is limited to
+  one company. Envelope ``company_id`` is still the caller's ``env.company``.
 
 Periods and stock
 -----------------
@@ -77,9 +93,32 @@ Periods and stock
 * Exactly 12 contiguous half-open 30-day periods, ``k=0`` newest:
   ``[as_of - 30*(k+1) days, as_of - 30*k days)`` as UTC-naive Odoo datetimes.
 * Missing demand is ``0``, not omitted.
-* Live ``qty_available`` uses company-scoped ``to_date=as_of``.
+* Live ``qty_available`` sums on-hand across all companies with
+  ``to_date=as_of``.
 * Period-end stock uses the same definition with ``to_date=period.end``.
   Live quantity MUST equal period-0 end stock.
+* ``alternative_products`` is a list (possibly empty) of directional
+  website_sale templates. Each item is ``{id, name, skus, qty_available}``.
+  There are no nested ``periods``. ``schema_version`` stays ``1``.
+
+Alternative products
+--------------------
+
+* Directional ``product.product.product_tmpl_id.alternative_product_ids``
+  only. Reverse M2M is omitted. The primary product's own template is
+  skipped. Templates are deduplicated.
+* One item per remaining template. ``skus`` are sorted unique non-empty
+  trimmed ``default_code`` values of that template's active
+  ``type == 'product'`` variants. Variants without a valid SKU still
+  contribute ``qty_available`` when they are active storable.
+* Frozen ``qty_available`` uses the same ``_qty_available_at`` helper,
+  ``as_of``, and all-company scope as primary live stock. Alternatives
+  are batch-resolved per page, not once per product row. Templates whose
+  frozen on-hand is zero or negative are omitted (the list may be empty).
+* The forecast-agent consumer shows this stock as a Sheet reference
+  only. It MUST NOT change ``Unidades a Comprar`` or ``Stock final``.
+  Roll out this addon first; roll back the agent first if the agent
+  already requires the nested field.
 
 Pagination
 ----------
@@ -93,7 +132,7 @@ Pagination
 Configuration
 =============
 
-#. Install or upgrade this module (``15.0.5.0.0``).
+#. Install or upgrade this module (``15.0.6.0.0``).
 #. The tool appears on ``/mcp`` ``tools/list``. Restart the worker if needed.
 
 Forecast agent bridge

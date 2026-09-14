@@ -179,6 +179,82 @@ class TestSoldStorableProducts(TransactionCase):
                 return row
         return None
 
+    def _create_template_with_variants(
+        self, name, codes_by_value, product_type="product"
+    ):
+        """Create a template with one attribute and one variant per value.
+
+        Args:
+            name: Template name.
+            codes_by_value: Mapping of attribute value name to
+                ``default_code``. Empty or false codes still create the
+                variant.
+            product_type: Template ``type`` (``product``, ``consu``,
+                ``service``).
+        """
+        attribute = self.env["product.attribute"].create(
+            {
+                "name": "FD Attr %s" % name,
+                "create_variant": "always",
+            }
+        )
+        values = self.env["product.attribute.value"]
+        for value_name in codes_by_value:
+            values |= self.env["product.attribute.value"].create(
+                {
+                    "name": value_name,
+                    "attribute_id": attribute.id,
+                }
+            )
+        template = self.env["product.template"].create(
+            {
+                "name": name,
+                "type": product_type,
+                "list_price": 10.0,
+                "uom_id": self.uom_unit.id,
+                "uom_po_id": self.uom_unit.id,
+                "attribute_line_ids": [
+                    (
+                        0,
+                        0,
+                        {
+                            "attribute_id": attribute.id,
+                            "value_ids": [(6, 0, values.ids)],
+                        },
+                    )
+                ],
+            }
+        )
+        for variant in template.product_variant_ids:
+            value_name = variant.product_template_attribute_value_ids[:1].name
+            variant.default_code = codes_by_value.get(value_name)
+        return template
+
+    def _variant_for(self, template, value_name):
+        """Return the variant whose attribute value name matches ``value_name``."""
+        for variant in template.product_variant_ids:
+            if variant.product_template_attribute_value_ids[:1].name == value_name:
+                return variant
+        return self.env["product.product"]
+
+    def _link_alternative(self, product, template):
+        """Point ``product``'s template at ``template`` as a directional alternative."""
+        product.product_tmpl_id.write(
+            {"alternative_product_ids": [(4, template.id)]}
+        )
+
+    def _sold_primary(self, name, default_code):
+        """Create a coded storable SKU with a confirmed sale in the frozen window."""
+        as_of = fields.Datetime.to_datetime(FROZEN_AS_OF)
+        product = self._create_product(name, default_code)
+        self._create_order(
+            [product],
+            confirm=True,
+            date_order=as_of - timedelta(days=10),
+            line_qty=1.0,
+        )
+        return product
+
     def _assert_confirmed(self, order):
         """Tommasi may auto-close confirmed orders to ``done``."""
         self.assertIn(order.state, ("sale", "done"))
@@ -195,7 +271,14 @@ class TestSoldStorableProducts(TransactionCase):
         self.assertIsNotNone(row)
         self.assertGreaterEqual(
             set(row.keys()),
-            {"id", "default_code", "name", "qty_available", "periods"},
+            {
+                "id",
+                "default_code",
+                "name",
+                "qty_available",
+                "periods",
+                "alternative_products",
+            },
         )
         self.assertEqual(row["id"], product.id)
         self.assertEqual(row["default_code"], product.default_code)
@@ -398,7 +481,7 @@ class TestSoldStorableProducts(TransactionCase):
         self.assertEqual(codes, ["FD-HAS-CODE"])
 
     def test_envelope_company_id_is_authenticated_company(self):
-        """The envelope reports exactly the authenticated company."""
+        """The envelope reports the caller's company; search is not scoped to it."""
         as_of = fields.Datetime.to_datetime(FROZEN_AS_OF)
         product = self._create_product("Company Scope SKU", "FD-CO-A")
         self._create_order(
@@ -410,8 +493,8 @@ class TestSoldStorableProducts(TransactionCase):
         envelope = self._sold_envelope(as_of=FROZEN_AS_OF)
         self.assertEqual(envelope["company_id"], self.env.company.id)
 
-    def test_other_company_orders_and_stock_excluded(self):
-        """Orders and quants of company B must not leak into company A."""
+    def test_all_company_orders_and_stock_are_included(self):
+        """Orders and quants of every company enter eligibility, demand, and stock."""
         as_of = fields.Datetime.to_datetime(FROZEN_AS_OF)
         in_window = as_of - timedelta(days=10)
         company_a = self.env.company
@@ -463,9 +546,76 @@ class TestSoldStorableProducts(TransactionCase):
         self.assertEqual(envelope["company_id"], company_a.id)
         sold_ids = [row["id"] for row in envelope["products"]]
         self.assertIn(shared.id, sold_ids)
-        self.assertNotIn(only_b.id, sold_ids)
+        self.assertIn(only_b.id, sold_ids)
         row = self._row_for(shared, as_of=FROZEN_AS_OF, company=company_a)
-        self.assertEqual(row["qty_available"], 10.0)
+        self.assertEqual(row["qty_available"], 60.0)
+        self.assertEqual(row["periods"][0]["ordered_qty_raw"], 12.0)
+        only_b_row = self._row_for(only_b, as_of=FROZEN_AS_OF, company=company_a)
+        self.assertEqual(only_b_row["periods"][0]["ordered_qty_raw"], 9.0)
+
+    def test_search_ignores_user_allowed_companies(self):
+        """A user limited to company A still sees company B sales and stock."""
+        as_of = fields.Datetime.to_datetime(FROZEN_AS_OF)
+        in_window = as_of - timedelta(days=10)
+        company_a = self.env.company
+        company_b = self.env["res.company"].create(
+            {"name": "Forecast Demand Co B Limited"}
+        )
+        warehouse_b = self.env["stock.warehouse"].search(
+            [("company_id", "=", company_b.id)], limit=1
+        )
+        self.assertTrue(warehouse_b)
+        only_b = self._create_product("User Limited Only B", "FD-CO-USER-B")
+        self._create_order(
+            [only_b],
+            confirm=True,
+            date_order=in_window,
+            line_qty=9.0,
+            company=company_b,
+            warehouse=warehouse_b,
+        )
+        self._set_on_hand(
+            only_b,
+            50.0,
+            warehouse_b,
+            company=company_b,
+            move_date=in_window,
+        )
+        user = (
+            self.env["res.users"]
+            .with_context(no_reset_password=True)
+            .create(
+                {
+                    "name": "Forecast Limited Co User",
+                    "login": "forecast_limited_co",
+                    "email": "forecast_limited_co@example.com",
+                    "company_id": company_a.id,
+                    "company_ids": [(6, 0, [company_a.id])],
+                    "groups_id": [
+                        (
+                            6,
+                            0,
+                            [
+                                self.env.ref("base.group_user").id,
+                                self.env.ref("sales_team.group_sale_salesman").id,
+                                self.env.ref("stock.group_stock_user").id,
+                            ],
+                        )
+                    ],
+                }
+            )
+        )
+        envelope = (
+            self.env["product.product"]
+            .with_user(user)
+            .get_sold_storable_products(as_of=FROZEN_AS_OF, limit=100, offset=0)
+        )
+        self.assertEqual(envelope["company_id"], company_a.id)
+        sold_ids = [row["id"] for row in envelope["products"]]
+        self.assertIn(only_b.id, sold_ids)
+        row = next(item for item in envelope["products"] if item["id"] == only_b.id)
+        self.assertEqual(row["qty_available"], 50.0)
+        self.assertEqual(row["periods"][0]["ordered_qty_raw"], 9.0)
 
     def test_twelve_periods_newest_demand_others_zero(self):
         """Exactly 12 contiguous periods; only period 0 carries newest demand."""
@@ -614,8 +764,8 @@ class TestSoldStorableProducts(TransactionCase):
             move_date=as_of - timedelta(days=5),
         )
         row = self._row_for(product, as_of=FROZEN_AS_OF)
-        self.assertEqual(row["qty_available"], 10.0)
-        self.assertEqual(row["periods"][0]["period_end_qty"], 10.0)
+        self.assertEqual(row["qty_available"], 60.0)
+        self.assertEqual(row["periods"][0]["period_end_qty"], 60.0)
         self.assertEqual(row["qty_available"], row["periods"][0]["period_end_qty"])
 
     def test_multi_page_shares_frozen_as_of(self):
@@ -672,3 +822,218 @@ class TestSoldStorableProducts(TransactionCase):
         self.assertEqual(envelope["products"], [])
         self.assertFalse(envelope["has_more"])
         self.assertIsNone(envelope["next_offset"])
+
+    def test_alternative_products_empty_when_none(self):
+        """Eligible products with no directional alternatives get an empty list."""
+        product = self._sold_primary("Alt Empty Primary", "FD-ALT-EMPTY")
+        envelope = self._sold_envelope(as_of=FROZEN_AS_OF)
+        self.assertEqual(envelope["schema_version"], 1)
+        row = self._row_for(product, as_of=FROZEN_AS_OF)
+        self.assertIsNotNone(row)
+        self.assertEqual(row["alternative_products"], [])
+
+    def test_alternative_products_sums_two_storable_variants(self):
+        """One template item sums both active storable variants and sorts SKUs."""
+        as_of = fields.Datetime.to_datetime(FROZEN_AS_OF)
+        primary = self._sold_primary("Alt TwoVar Primary", "FD-ALT-2V-PRI")
+        alt_tmpl = self._create_template_with_variants(
+            "Alt Two Variants",
+            {"A": "FD-ALT-SKU-B", "B": "FD-ALT-SKU-A"},
+        )
+        variant_a = self._variant_for(alt_tmpl, "A")
+        variant_b = self._variant_for(alt_tmpl, "B")
+        self._set_on_hand(
+            variant_a, 4.0, self.warehouse, move_date=as_of - timedelta(days=5)
+        )
+        self._set_on_hand(
+            variant_b, 8.0, self.warehouse, move_date=as_of - timedelta(days=5)
+        )
+        self._link_alternative(primary, alt_tmpl)
+        row = self._row_for(primary, as_of=FROZEN_AS_OF)
+        self.assertEqual(len(row["alternative_products"]), 1)
+        item = row["alternative_products"][0]
+        self.assertEqual(
+            set(item.keys()),
+            {"id", "name", "skus", "qty_available"},
+        )
+        self.assertEqual(item["id"], alt_tmpl.id)
+        self.assertEqual(item["name"], alt_tmpl.name)
+        self.assertEqual(item["skus"], ["FD-ALT-SKU-A", "FD-ALT-SKU-B"])
+        self.assertEqual(item["qty_available"], 12.0)
+
+    def test_alternative_products_omits_reverse_m2m(self):
+        """Reverse-only M2M (alt points at primary) is omitted from the row."""
+        primary = self._sold_primary("Alt Reverse Primary", "FD-ALT-REV-PRI")
+        other = self._create_product("Alt Reverse Other", "FD-ALT-REV-OTH")
+        other.product_tmpl_id.write(
+            {"alternative_product_ids": [(4, primary.product_tmpl_id.id)]}
+        )
+        row = self._row_for(primary, as_of=FROZEN_AS_OF)
+        self.assertEqual(row["alternative_products"], [])
+
+    def test_alternative_products_skips_primary_template(self):
+        """The primary template listed as its own alternative is skipped."""
+        primary = self._sold_primary("Alt Self Primary", "FD-ALT-SELF-PRI")
+        self._link_alternative(primary, primary.product_tmpl_id)
+        row = self._row_for(primary, as_of=FROZEN_AS_OF)
+        self.assertEqual(row["alternative_products"], [])
+
+    def test_alternative_products_dedupes_duplicate_m2m(self):
+        """Duplicate M2M rows for the same template yield one list item."""
+        as_of = fields.Datetime.to_datetime(FROZEN_AS_OF)
+        primary = self._sold_primary("Alt Dedupe Primary", "FD-ALT-DED-PRI")
+        alt_tmpl = self._create_template_with_variants(
+            "Alt Dedupe Tmpl", {"X": "FD-ALT-DED-SKU"}
+        )
+        variant = self._variant_for(alt_tmpl, "X")
+        self._set_on_hand(
+            variant, 3.0, self.warehouse, move_date=as_of - timedelta(days=5)
+        )
+        self._link_alternative(primary, alt_tmpl)
+        # Rel table PK forbids a second SQL row; seed a duplicated id tuple
+        # in the M2M cache so the helper still sees T twice.
+        field = primary.product_tmpl_id._fields["alternative_product_ids"]
+        self.env.cache.set(
+            primary.product_tmpl_id, field, (alt_tmpl.id, alt_tmpl.id)
+        )
+        row = self._row_for(primary, as_of=FROZEN_AS_OF)
+        matching = [
+            item
+            for item in row["alternative_products"]
+            if item["id"] == alt_tmpl.id
+        ]
+        self.assertEqual(len(matching), 1)
+        self.assertEqual(matching[0]["skus"], ["FD-ALT-DED-SKU"])
+        self.assertEqual(matching[0]["qty_available"], 3.0)
+
+    def test_alternative_products_sku_less_variant_counts_qty(self):
+        """SKU-less active storable variants add qty but omit empty codes."""
+        as_of = fields.Datetime.to_datetime(FROZEN_AS_OF)
+        primary = self._sold_primary("Alt Skuless Primary", "FD-ALT-SKL-PRI")
+        alt_tmpl = self._create_template_with_variants(
+            "Alt Skuless Tmpl",
+            {"Coded": "FD-ALT-SKL-CODE", "Bare": ""},
+        )
+        coded = self._variant_for(alt_tmpl, "Coded")
+        bare = self._variant_for(alt_tmpl, "Bare")
+        self._set_on_hand(
+            coded, 2.0, self.warehouse, move_date=as_of - timedelta(days=5)
+        )
+        self._set_on_hand(
+            bare, 3.0, self.warehouse, move_date=as_of - timedelta(days=5)
+        )
+        self._link_alternative(primary, alt_tmpl)
+        row = self._row_for(primary, as_of=FROZEN_AS_OF)
+        item = row["alternative_products"][0]
+        self.assertEqual(item["qty_available"], 5.0)
+        self.assertEqual(item["skus"], ["FD-ALT-SKL-CODE"])
+        self.assertNotIn("", item["skus"])
+
+    def test_alternative_products_ignores_inactive_and_non_storable(self):
+        """Inactive storable and active non-storable variants are ignored."""
+        as_of = fields.Datetime.to_datetime(FROZEN_AS_OF)
+        primary = self._sold_primary("Alt Skip Primary", "FD-ALT-SKIP-PRI")
+        storable_tmpl = self._create_template_with_variants(
+            "Alt Skip Storable",
+            {"Keep": "FD-ALT-SKIP-KEEP", "Dead": "FD-ALT-SKIP-DEAD"},
+        )
+        keep = self._variant_for(storable_tmpl, "Keep")
+        dead = self._variant_for(storable_tmpl, "Dead")
+        self._set_on_hand(
+            keep, 4.0, self.warehouse, move_date=as_of - timedelta(days=5)
+        )
+        self._set_on_hand(
+            dead, 8.0, self.warehouse, move_date=as_of - timedelta(days=5)
+        )
+        dead.active = False
+        service = self._create_product(
+            "Alt Skip Service", "FD-ALT-SKIP-SERV", product_type="service"
+        )
+        self._link_alternative(primary, storable_tmpl)
+        self._link_alternative(primary, service.product_tmpl_id)
+        row = self._row_for(primary, as_of=FROZEN_AS_OF)
+        by_id = {item["id"]: item for item in row["alternative_products"]}
+        self.assertIn(storable_tmpl.id, by_id)
+        storable_item = by_id[storable_tmpl.id]
+        self.assertEqual(storable_item["skus"], ["FD-ALT-SKIP-KEEP"])
+        self.assertNotIn("FD-ALT-SKIP-DEAD", storable_item["skus"])
+        self.assertEqual(storable_item["qty_available"], 4.0)
+        self.assertNotIn(service.product_tmpl_id.id, by_id)
+
+    def test_alternative_products_omits_zero_qty(self):
+        """Directional alternatives with zero frozen on-hand are omitted."""
+        as_of = fields.Datetime.to_datetime(FROZEN_AS_OF)
+        primary = self._sold_primary("Alt Zero Primary", "FD-ALT-ZERO-PRI")
+        zero_tmpl = self._create_template_with_variants(
+            "Alt Zero Tmpl", {"X": "FD-ALT-ZERO-SKU"}
+        )
+        kept_tmpl = self._create_template_with_variants(
+            "Alt Kept Tmpl", {"Y": "FD-ALT-KEPT-SKU"}
+        )
+        kept = self._variant_for(kept_tmpl, "Y")
+        self._set_on_hand(
+            kept, 5.0, self.warehouse, move_date=as_of - timedelta(days=5)
+        )
+        self._link_alternative(primary, zero_tmpl)
+        self._link_alternative(primary, kept_tmpl)
+        row = self._row_for(primary, as_of=FROZEN_AS_OF)
+        by_id = {item["id"]: item for item in row["alternative_products"]}
+        self.assertNotIn(zero_tmpl.id, by_id)
+        self.assertIn(kept_tmpl.id, by_id)
+        self.assertEqual(by_id[kept_tmpl.id]["qty_available"], 5.0)
+        self.assertEqual(by_id[kept_tmpl.id]["skus"], ["FD-ALT-KEPT-SKU"])
+
+    def test_alternative_products_qty_uses_frozen_as_of(self):
+        """On-hand counted after as_of must not appear on alternative qty."""
+        as_of = fields.Datetime.to_datetime(FROZEN_AS_OF)
+        primary = self._sold_primary("Alt Frozen Primary", "FD-ALT-FRZ-PRI")
+        alt_tmpl = self._create_template_with_variants(
+            "Alt Frozen Tmpl", {"X": "FD-ALT-FRZ-SKU"}
+        )
+        variant = self._variant_for(alt_tmpl, "X")
+        self._set_on_hand(
+            variant,
+            10.0,
+            self.warehouse,
+            move_date=as_of - timedelta(days=5),
+        )
+        self._set_on_hand(variant, 17.0, self.warehouse)
+        self._link_alternative(primary, alt_tmpl)
+        row = self._row_for(primary, as_of=FROZEN_AS_OF)
+        item = row["alternative_products"][0]
+        self.assertEqual(item["qty_available"], 10.0)
+
+    def test_alternative_products_qty_is_batched_per_page(self):
+        """Alternative on-hand uses one extra _qty_available_at, not one per row."""
+        as_of = fields.Datetime.to_datetime(FROZEN_AS_OF)
+        alt_tmpl = self._create_template_with_variants(
+            "Alt Batch Tmpl", {"X": "FD-ALT-BAT-SKU"}
+        )
+        alt_variant = self._variant_for(alt_tmpl, "X")
+        self._set_on_hand(
+            alt_variant, 6.0, self.warehouse, move_date=as_of - timedelta(days=5)
+        )
+        primaries = [
+            self._sold_primary(
+                "Alt Batch Primary %s" % index, "FD-ALT-BAT-%s" % index
+            )
+            for index in (1, 2, 3)
+        ]
+        for primary in primaries:
+            self._link_alternative(primary, alt_tmpl)
+        ProductProduct = type(self.env["product.product"])
+        real_qty = ProductProduct._qty_available_at
+        calls = []
+
+        def _spy(this, products, when, company_ids):
+            calls.append(list(products.ids))
+            return real_qty(this, products, when, company_ids)
+
+        with patch.object(ProductProduct, "_qty_available_at", _spy):
+            envelope = self._sold_envelope(as_of=FROZEN_AS_OF)
+        alt_ids = set(alt_tmpl.product_variant_ids.ids)
+        alt_calls = [ids for ids in calls if alt_ids.intersection(ids)]
+        self.assertEqual(len(alt_calls), 1)
+        self.assertEqual(len(primaries), 3)
+        sold_ids = {row["id"] for row in envelope["products"]}
+        self.assertTrue(sold_ids.issuperset({primary.id for primary in primaries}))

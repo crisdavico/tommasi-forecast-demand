@@ -1,12 +1,12 @@
 {
     "name": "Tommasi Forecast Demand",
-    "version": "15.0.5.0.0",
+    "version": "15.0.6.2.0",
     "category": "Inventory/Product",
     "summary": "MCP tool returning paginated sold-storable demand envelopes",
     "author": "Eynes SRL",
     "license": "AGPL-3",
     "website": "https://gitlab.e-mips.com.ar/tommasi",
-    "depends": ["llm_tool", "llm_mcp_server", "sale_stock"],
+    "depends": ["llm_tool", "llm_mcp_server", "sale_stock", "website_sale"],
     "data": [
         "security/forecast_agent_security.xml",
         "security/ir.model.access.csv",

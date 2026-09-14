@@ -1,0 +1,33 @@
+schema: spec-driven
+change: add-alternative-stock-visibility
+artifact_store: openspec
+execution_mode: automatic
+delivery_strategy: single-pr
+chain_strategy: n/a
+strict_tdd: false
+project: tommasi-forecast-demand
+workspace_root: /home/crisd/projects/tommasi/odoo/tommasi/odoo/custom/src/otros/tommasi_forecast_demand
+allowed_edit_roots:
+  - /home/crisd/projects/tommasi/odoo/tommasi/odoo/custom/src/otros/tommasi_forecast_demand
+phases:
+  explore: skipped
+  propose: done
+  specs: done
+  design: done
+  tasks: done
+  apply: done
+  verify: warning
+  archive: pending
+apply_progress:
+  completed_tasks: 7
+  total_tasks: 8
+  remaining:
+    - "2.2 re-run inv test when Docker is available"
+next: none
+updated: "2026-09-14"
+notes: |
+  Apply complete except 2.2 re-invoke. Verify PASS WITH WARNINGS because
+  Docker was unavailable; cited prior inv test 58 passed, 0 failed, 0 errors.
+  Do not merge into published openspec/specs/ (archive later).
+  Additive nested field; schema_version stays 1.
+  Agent consumer apply is sibling; rollback agent first.
