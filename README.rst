@@ -156,8 +156,8 @@ Quick path
 #. Provision a dedicated edge ``edge_clients`` row with
    ``streaming_allowed=FALSE``. Store the matching API key and HMAC secret
    on the company config (manager-only).
-#. Run Forecast from Inventory / Reporting. Cron claims the queue; the
-   form does not wait on HTTP.
+#. Run Forecast from Inventory → Forecast. Confirm the all-company
+   wizard, then cron claims the queue; the form does not wait on HTTP.
 
 Local Compose snippet
 ---------------------

@@ -222,9 +222,11 @@ class TestForecastAgentAcl(TransactionCase):
             "finished_at",
         ):
             self._assert_readonly_field(root, fname)
-        self.env.ref(
-            "tommasi_forecast_demand.action_server_tommasi_forecast_agent_run_forecast"
+        wizard_action = self.env.ref(
+            "tommasi_forecast_demand.action_tommasi_forecast_agent_run_wizard"
         )
+        self.assertEqual(wizard_action.res_model, "tommasi.forecast.agent.run.wizard")
+        self.assertEqual(wizard_action.target, "new")
         forecast_menu = self.env.ref("tommasi_forecast_demand.menu_tommasi_forecast")
         self.assertEqual(
             forecast_menu.parent_id,
@@ -236,6 +238,11 @@ class TestForecastAgentAcl(TransactionCase):
             "tommasi_forecast_demand.menu_tommasi_forecast_agent_run_forecast"
         )
         self.assertEqual(run_forecast_menu.parent_id, forecast_menu)
+        self.assertEqual(run_forecast_menu.action, wizard_action)
+        llm_run_forecast_menu = self.env.ref(
+            "tommasi_forecast_demand.menu_tommasi_forecast_agent_run_forecast_llm"
+        )
+        self.assertEqual(llm_run_forecast_menu.action, wizard_action)
         config_menu = self.env.ref(
             "tommasi_forecast_demand.menu_tommasi_forecast_agent_config"
         )
@@ -243,6 +250,26 @@ class TestForecastAgentAcl(TransactionCase):
             config_menu.parent_id,
             self.env.ref("llm.menu_llm_config"),
         )
+
+    def test_wizard_manager_only(self):
+        """Non-managers cannot open the wizard; managers can."""
+        manager = new_test_user(
+            self.env,
+            login="tfd_forecast_wiz_mgr",
+            groups="llm.group_llm_manager",
+            company_id=self.env.company.id,
+            company_ids=[(6, 0, [self.env.company.id])],
+        )
+        user = new_test_user(
+            self.env,
+            login="tfd_forecast_wiz_user",
+            groups="base.group_user",
+        )
+        Wizard = self.env["tommasi.forecast.agent.run.wizard"]
+        with self.assertRaises(AccessError):
+            Wizard.with_user(user).create({})
+        wizard = Wizard.with_user(manager).create({})
+        self.assertTrue(wizard.exists())
 
     def test_run_other_company_and_non_manager_denied(self):
         """Other-company managers and non-managers cannot search or read runs."""

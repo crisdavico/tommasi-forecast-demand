@@ -1,0 +1,463 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* tommasi_forecast_demand
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 15.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-14 22:00+0000\n"
+"PO-Revision-Date: 2026-09-14 22:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es_AR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.constraint,message:tommasi_forecast_demand.constraint_tommasi_forecast_agent_config_company_id_uniq
+#: code:addons/tommasi_forecast_demand/models/forecast_agent_config.py:0
+#, python-format
+msgid "A forecast agent configuration already exists for this company."
+msgstr "Ya existe una configuración del agente de pronóstico para esta compañía."
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_config__api_key
+msgid "API Key"
+msgstr "Clave API"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_config__active
+msgid "Active"
+msgstr "Activo"
+
+#. module: tommasi_forecast_demand
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_config_search
+msgid "Archived"
+msgstr "Archivado"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_config__assistant_id
+msgid "Assistant ID"
+msgstr "ID del asistente"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run__attempt_count
+msgid "Attempt Count"
+msgstr "Cantidad de intentos"
+
+#. module: tommasi_forecast_demand
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_run_form
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_run_wizard_form
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. module: tommasi_forecast_demand
+#: code:addons/tommasi_forecast_demand/models/forecast_agent_run.py:0
+#, python-format
+msgid "Cancelled by user."
+msgstr "Cancelado por el usuario."
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_config__company_id
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run__company_id
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_run_search
+msgid "Company"
+msgstr "Compañía"
+
+#. module: tommasi_forecast_demand
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_run_wizard_form
+msgid "Confirm"
+msgstr "Confirmar"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields.selection,name:tommasi_forecast_demand.selection__tommasi_forecast_agent_run__state__completed
+msgid "Completed"
+msgstr "Completado"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run__config_id
+msgid "Config"
+msgstr "Configuración"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_config__connect_timeout
+msgid "Connect Timeout"
+msgstr "Tiempo de conexión"
+
+#. module: tommasi_forecast_demand
+#: code:addons/tommasi_forecast_demand/models/forecast_agent_config.py:0
+#, python-format
+msgid "Connect timeout must be between %s and %s seconds."
+msgstr "El tiempo de conexión debe estar entre %s y %s segundos."
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_config__create_uid
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run__create_uid
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run_wizard__create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_config__create_date
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run__create_date
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run_wizard__create_date
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: tommasi_forecast_demand
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_run_form
+msgid "Diagnostics"
+msgstr "Diagnóstico"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_config__display_name
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run__display_name
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run_wizard__display_name
+msgid "Display Name"
+msgstr "Nombre mostrado"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_config__edge_url
+msgid "Edge URL"
+msgstr "URL del Edge"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields.selection,name:tommasi_forecast_demand.selection__tommasi_forecast_agent_run__state__failed
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_run_search
+msgid "Failed"
+msgstr "Fallido"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run__finished_at
+msgid "Finished At"
+msgstr "Finalizado"
+
+#. module: tommasi_forecast_demand
+#: model:ir.ui.menu,name:tommasi_forecast_demand.menu_tommasi_forecast
+#: model:ir.ui.menu,name:tommasi_forecast_demand.menu_tommasi_forecast_llm
+msgid "Forecast"
+msgstr "Pronóstico"
+
+#. module: tommasi_forecast_demand
+#: model:ir.actions.act_window,name:tommasi_forecast_demand.action_tommasi_forecast_agent_config
+#: model:ir.model,name:tommasi_forecast_demand.model_tommasi_forecast_agent_config
+#: model:ir.ui.menu,name:tommasi_forecast_demand.menu_tommasi_forecast_agent_config
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_config_form
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_config_search
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_config_tree
+msgid "Forecast Agent Config"
+msgstr "Configuración del agente de pronóstico"
+
+#. module: tommasi_forecast_demand
+#: model:ir.rule,name:tommasi_forecast_demand.tommasi_forecast_agent_config_company_rule
+msgid "Forecast Agent Config: multi-company"
+msgstr "Configuración del agente de pronóstico: multi-compañía"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model,name:tommasi_forecast_demand.model_tommasi_forecast_agent_hmac
+msgid "Forecast Agent HMAC Client"
+msgstr "Cliente HMAC del agente de pronóstico"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model,name:tommasi_forecast_demand.model_tommasi_forecast_agent_run
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_run_form
+msgid "Forecast Agent Run"
+msgstr "Ejecución del agente de pronóstico"
+
+#. module: tommasi_forecast_demand
+#: model:ir.rule,name:tommasi_forecast_demand.tommasi_forecast_agent_run_company_rule
+msgid "Forecast Agent Run: multi-company"
+msgstr "Ejecución del agente de pronóstico: multi-compañía"
+
+#. module: tommasi_forecast_demand
+#: model:ir.actions.act_window,name:tommasi_forecast_demand.action_tommasi_forecast_agent_run
+#: model:ir.ui.menu,name:tommasi_forecast_demand.menu_tommasi_forecast_agent_run
+#: model:ir.ui.menu,name:tommasi_forecast_demand.menu_tommasi_forecast_agent_run_llm
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_run_search
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_run_tree
+msgid "Forecast Agent Runs"
+msgstr "Ejecuciones del agente de pronóstico"
+
+#. module: tommasi_forecast_demand
+#: model:ir.actions.server,name:tommasi_forecast_demand.ir_cron_forecast_agent_process_runs_ir_actions_server
+#: model:ir.cron,cron_name:tommasi_forecast_demand.ir_cron_forecast_agent_process_runs
+#: model:ir.cron,name:tommasi_forecast_demand.ir_cron_forecast_agent_process_runs
+msgid "Forecast Agent: Process Runs"
+msgstr "Agente de pronóstico: procesar ejecuciones"
+
+#. module: tommasi_forecast_demand
+#: code:addons/tommasi_forecast_demand/models/forecast_agent_run.py:0
+#, python-format
+msgid "Forecast Run"
+msgstr "Ejecución de pronóstico"
+
+#. module: tommasi_forecast_demand
+#: code:addons/tommasi_forecast_demand/models/forecast_agent_hmac.py:0
+#, python-format
+msgid "Forecast agent credentials are not configured."
+msgstr "Las credenciales del agente de pronóstico no están configuradas."
+
+#. module: tommasi_forecast_demand
+#: code:addons/tommasi_forecast_demand/models/forecast_agent_hmac.py:0
+#, python-format
+msgid "Forecast agent request failed: %s"
+msgstr "Falló la solicitud al agente de pronóstico: %s"
+
+#. module: tommasi_forecast_demand
+#: code:addons/tommasi_forecast_demand/models/forecast_agent_hmac.py:0
+#, python-format
+msgid "Forecast agent returned HTTP %s."
+msgstr "El agente de pronóstico devolvió HTTP %s."
+
+#. module: tommasi_forecast_demand
+#: code:addons/tommasi_forecast_demand/models/forecast_agent_run.py:0
+#, python-format
+msgid "Forecast agent returned invalid JSON."
+msgstr "El agente de pronóstico devolvió un JSON inválido."
+
+#. module: tommasi_forecast_demand
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_run_search
+msgid "Group By"
+msgstr "Agrupar por"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_config__hmac_secret
+msgid "HMAC Secret"
+msgstr "Secreto HMAC"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_config__id
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run__id
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run_wizard__id
+msgid "ID"
+msgstr "ID"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run__idempotency_key
+msgid "Idempotency Key"
+msgstr "Clave de idempotencia"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run__last_error
+msgid "Last Error"
+msgstr "Último error"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run__last_http_status
+msgid "Last Http Status"
+msgstr "Último estado HTTP"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run__last_request_id
+msgid "Last Request Id"
+msgstr "ID de última solicitud"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_config__write_uid
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run__write_uid
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run_wizard__write_uid
+msgid "Last Updated by"
+msgstr "Última actualización por"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_config__write_date
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run__write_date
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run_wizard__write_date
+msgid "Last Updated on"
+msgstr "Última actualización el"
+
+#. module: tommasi_forecast_demand
+#: model:ir.module.module,summary:tommasi_forecast_demand.module_tommasi_forecast_demand
+msgid "MCP tool returning paginated sold-storable demand envelopes"
+msgstr "Herramienta MCP que devuelve sobres paginados de demanda de productos almacenables vendidos"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_config__max_attempts
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run__max_attempts
+msgid "Max Attempts"
+msgstr "Intentos máximos"
+
+#. module: tommasi_forecast_demand
+#: code:addons/tommasi_forecast_demand/models/forecast_agent_config.py:0
+#, python-format
+msgid "Max attempts must be between %s and %s."
+msgstr "Los intentos máximos deben estar entre %s y %s."
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run__name
+msgid "Name"
+msgstr "Nombre"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run__next_attempt_at
+msgid "Next Attempt At"
+msgstr "Próximo intento"
+
+#. module: tommasi_forecast_demand
+#: code:addons/tommasi_forecast_demand/models/forecast_agent_run.py:0
+#, python-format
+msgid "No active forecast agent configuration for this company."
+msgstr "No hay una configuración activa del agente de pronóstico para esta compañía."
+
+#. module: tommasi_forecast_demand
+#: code:addons/tommasi_forecast_demand/models/forecast_agent_run.py:0
+#, python-format
+msgid "Only failed runs can be retried."
+msgstr "Solo se pueden reintentar ejecuciones fallidas."
+
+#. module: tommasi_forecast_demand
+#: code:addons/tommasi_forecast_demand/models/forecast_agent_run.py:0
+#, python-format
+msgid "Only queued, running, or retry runs can be cancelled."
+msgstr "Solo se pueden cancelar ejecuciones en cola, en ejecución o en reintento."
+
+#. module: tommasi_forecast_demand
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_run_form
+msgid "Output"
+msgstr "Salida"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields.selection,name:tommasi_forecast_demand.selection__tommasi_forecast_agent_run__state__queued
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_run_search
+msgid "Queued"
+msgstr "En cola"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_config__read_timeout
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run__read_timeout
+msgid "Read Timeout"
+msgstr "Tiempo de lectura"
+
+#. module: tommasi_forecast_demand
+#: code:addons/tommasi_forecast_demand/models/forecast_agent_config.py:0
+#, python-format
+msgid "Read timeout must be between %s and %s seconds."
+msgstr "El tiempo de lectura debe estar entre %s y %s segundos."
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run__request_payload
+msgid "Request Payload"
+msgstr "Cuerpo de la solicitud"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run__response_payload
+msgid "Response Payload"
+msgstr "Cuerpo de la respuesta"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields.selection,name:tommasi_forecast_demand.selection__tommasi_forecast_agent_run__state__retry
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_run_form
+msgid "Retry"
+msgstr "Reintentar"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_config__retry_backoff_seconds
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run__retry_backoff_seconds
+msgid "Retry Backoff Seconds"
+msgstr "Segundos de espera entre reintentos"
+
+#. module: tommasi_forecast_demand
+#: code:addons/tommasi_forecast_demand/models/forecast_agent_config.py:0
+#, python-format
+msgid "Retry backoff must be between %s and %s seconds."
+msgstr "La espera entre reintentos debe estar entre %s y %s segundos."
+
+#. module: tommasi_forecast_demand
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_run_wizard_form
+msgid ""
+"Queue a forecast agent run for all companies? The run is processed by cron "
+"and does not wait for the agent."
+msgstr ""
+"¿Encolar una ejecución del agente de pronóstico para todas las compañías? "
+"La ejecución la procesa el cron y no espera al agente."
+
+#. module: tommasi_forecast_demand
+#: model:ir.actions.act_window,name:tommasi_forecast_demand.action_tommasi_forecast_agent_run_wizard
+#: model:ir.ui.menu,name:tommasi_forecast_demand.menu_tommasi_forecast_agent_run_forecast
+#: model:ir.ui.menu,name:tommasi_forecast_demand.menu_tommasi_forecast_agent_run_forecast_llm
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_config_form
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_run_form
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_run_wizard_form
+msgid "Run Forecast"
+msgstr "Ejecutar pronóstico"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model,name:tommasi_forecast_demand.model_tommasi_forecast_agent_run_wizard
+msgid "Run Forecast Confirmation"
+msgstr "Confirmación de ejecución de pronóstico"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields.selection,name:tommasi_forecast_demand.selection__tommasi_forecast_agent_run__state__running
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_run_search
+msgid "Running"
+msgstr "En ejecución"
+
+#. module: tommasi_forecast_demand
+#: code:addons/tommasi_forecast_demand/models/forecast_agent_run.py:0
+#, python-format
+msgid "Stale running recovered as transport failure."
+msgstr "Ejecución estancada recuperada como error de transporte."
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run__started_at
+msgid "Started At"
+msgstr "Inicio"
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.fields,field_description:tommasi_forecast_demand.field_tommasi_forecast_agent_run__state
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_run_search
+msgid "State"
+msgstr "Estado"
+
+#. module: tommasi_forecast_demand
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_run_form
+msgid "Status"
+msgstr "Estado"
+
+#. module: tommasi_forecast_demand
+#: code:addons/tommasi_forecast_demand/models/forecast_agent_config.py:0
+#, python-format
+msgid "The edge URL must be an HTTP or HTTPS address."
+msgstr "La URL del Edge debe ser una dirección HTTP o HTTPS."
+
+#. module: tommasi_forecast_demand
+#: code:addons/tommasi_forecast_demand/models/forecast_agent_config.py:0
+#, python-format
+msgid "The edge URL must not include user credentials."
+msgstr "La URL del Edge no debe incluir credenciales de usuario."
+
+#. module: tommasi_forecast_demand
+#: code:addons/tommasi_forecast_demand/models/forecast_agent_config.py:0
+#, python-format
+msgid "The edge URL must use HTTPS."
+msgstr "La URL del Edge debe usar HTTPS."
+
+#. module: tommasi_forecast_demand
+#: model:ir.model.constraint,message:tommasi_forecast_demand.constraint_tommasi_forecast_agent_run_idempotency_key_uniq
+msgid "The forecast agent run idempotency key must be unique."
+msgstr "La clave de idempotencia de la ejecución del agente de pronóstico debe ser única."
+
+#. module: tommasi_forecast_demand
+#: code:addons/tommasi_forecast_demand/models/forecast_agent_run.py:0
+#, python-format
+msgid "The idempotency key cannot be changed."
+msgstr "La clave de idempotencia no puede modificarse."
+
+#. module: tommasi_forecast_demand
+#: code:addons/tommasi_forecast_demand/models/forecast_agent_run.py:0
+#, python-format
+msgid "This run has no remaining attempts."
+msgstr "Esta ejecución no tiene intentos restantes."
+
+#. module: tommasi_forecast_demand
+#: model_terms:ir.ui.view,arch_db:tommasi_forecast_demand.view_tommasi_forecast_agent_run_form
+msgid "Timing"
+msgstr "Tiempos"
+
+#. module: tommasi_forecast_demand
+#: model:ir.module.module,shortdesc:tommasi_forecast_demand.module_tommasi_forecast_demand
+msgid "Tommasi Forecast Demand"
+msgstr "Tommasi Pronóstico de Demanda"

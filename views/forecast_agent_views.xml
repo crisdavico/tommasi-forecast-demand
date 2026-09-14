@@ -1,27 +1,36 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <record id="action_server_tommasi_forecast_agent_run_forecast" model="ir.actions.server">
+    <record id="view_tommasi_forecast_agent_run_wizard_form" model="ir.ui.view">
+        <field name="name">tommasi.forecast.agent.run.wizard.form</field>
+        <field name="model">tommasi.forecast.agent.run.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Run Forecast">
+                <p>
+                    Queue a forecast agent run for all companies? The run is processed by cron and does not wait for the agent.
+                </p>
+                <footer>
+                    <button
+                        name="action_confirm"
+                        string="Confirm"
+                        type="object"
+                        class="oe_highlight"
+                    />
+                    <button string="Cancel" class="oe_link" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_tommasi_forecast_agent_run_wizard" model="ir.actions.act_window">
         <field name="name">Run Forecast</field>
-        <field name="model_id" ref="model_tommasi_forecast_agent_run" />
-        <field name="binding_model_id" ref="model_tommasi_forecast_agent_config" />
-        <field name="binding_view_types">form</field>
-        <field name="state">code</field>
+        <field name="res_model">tommasi.forecast.agent.run.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="view_tommasi_forecast_agent_run_wizard_form" />
         <field
             name="groups_id"
             eval="[(4, ref('llm.group_llm_manager'))]"
         />
-        <field name="code">
-run = model.action_run_forecast()
-action = {
-    'name': 'Forecast Agent Run',
-    'type': 'ir.actions.act_window',
-    'res_model': 'tommasi.forecast.agent.run',
-    'view_mode': 'form',
-    'res_id': run.id,
-    'target': 'current',
-    'views': [(False, 'form')],
-}
-        </field>
     </record>
 
     <record id="view_tommasi_forecast_agent_config_tree" model="ir.ui.view">
@@ -44,7 +53,7 @@ action = {
             <form string="Forecast Agent Config">
                 <header>
                     <button
-                        name="%(action_server_tommasi_forecast_agent_run_forecast)d"
+                        name="%(action_tommasi_forecast_agent_run_wizard)d"
                         type="action"
                         string="Run Forecast"
                         class="oe_highlight"
@@ -128,7 +137,7 @@ action = {
             <form string="Forecast Agent Run" create="false" edit="false">
                 <header>
                     <button
-                        name="%(action_server_tommasi_forecast_agent_run_forecast)d"
+                        name="%(action_tommasi_forecast_agent_run_wizard)d"
                         type="action"
                         string="Run Forecast"
                         class="oe_highlight"
@@ -254,7 +263,7 @@ action = {
         id="menu_tommasi_forecast_agent_run_forecast_llm"
         name="Run Forecast"
         parent="menu_tommasi_forecast_llm"
-        action="action_server_tommasi_forecast_agent_run_forecast"
+        action="action_tommasi_forecast_agent_run_wizard"
         sequence="10"
         groups="llm.group_llm_manager"
     />
@@ -277,7 +286,7 @@ action = {
         id="menu_tommasi_forecast_agent_run_forecast"
         name="Run Forecast"
         parent="menu_tommasi_forecast"
-        action="action_server_tommasi_forecast_agent_run_forecast"
+        action="action_tommasi_forecast_agent_run_wizard"
         sequence="10"
         groups="llm.group_llm_manager"
     />

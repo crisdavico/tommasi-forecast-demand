@@ -68,6 +68,45 @@ class TestForecastAgentRun(TransactionCase):
         self.assertNotIn(SECRET_API_KEY, str(ctx.exception))
         self.assertNotIn(SECRET_HMAC, str(ctx.exception))
 
+    def _wizard(self, **vals):
+        return self.env["tommasi.forecast.agent.run.wizard"].create(vals)
+
+    def test_wizard_create_does_not_enqueue(self):
+        """Opening the confirmation wizard must not queue a run."""
+        self._config()
+        Run = self._run_model()
+        before = Run.search_count([])
+        self._wizard()
+        self.assertEqual(Run.search_count([]), before)
+
+    def test_wizard_confirm_enqueues_and_opens_run(self):
+        """Confirming the wizard must queue a run and open its form."""
+        self._config()
+        Run = self._run_model()
+        before = Run.search_count([])
+        with patch(POST_PATH) as mock_post:
+            action = self._wizard().action_confirm()
+        self.assertEqual(mock_post.call_count, 0)
+        self.assertEqual(Run.search_count([]), before + 1)
+        self.assertEqual(action["type"], "ir.actions.act_window")
+        self.assertEqual(action["res_model"], "tommasi.forecast.agent.run")
+        self.assertEqual(action["view_mode"], "form")
+        self.assertEqual(action["target"], "current")
+        run = Run.browse(action["res_id"])
+        self.assertTrue(run.exists())
+        self.assertEqual(run.state, "queued")
+        self.assertEqual(run.company_id, self.env.company)
+
+    def test_wizard_confirm_missing_config_raises_user_error(self):
+        """Confirm without an active config must raise and must not create a run."""
+        Run = self._run_model()
+        before = Run.search_count([])
+        with patch(POST_PATH) as mock_post:
+            with self.assertRaises(UserError):
+                self._wizard().action_confirm()
+        self.assertEqual(mock_post.call_count, 0)
+        self.assertEqual(Run.search_count([]), before)
+
     def test_claim_queued_run(self):
         """SKIP LOCKED claim marks due queued rows running and skips the rest."""
         config = self._config()
