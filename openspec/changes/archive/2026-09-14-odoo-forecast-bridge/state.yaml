@@ -1,0 +1,36 @@
+# SDD change state — orchestrator-managed
+change: odoo-forecast-bridge
+artifact_store: openspec
+delivery_strategy: exception-ok
+chain_strategy: stacked-to-main
+execution_mode: automatic
+subagent_model: cursor-grok-4.6-high
+phase: archive
+updated: 2026-09-14
+artifacts:
+  exploration: true
+  proposal: true
+  specs: true
+  design: true
+  tasks: true
+  apply_progress: true
+  verify_report: true
+  archive_report: true
+preproposal:
+  schema: gentle-ai.sdd-preproposal/v1
+  research: unselected
+  product_decisions: confirmed
+  proposal_ready: true
+  decisions:
+    - Durable run model plus ir.cron worker; no queue_job and no blocking HTTP in the browser request.
+    - Document doodba tommasi-forecast-edge snippet in README only; do not edit parent devel.yaml in this change.
+    - Store optional assistant_id on config; do not send assistant_id on invoke JSON while InvokeRequest forbids extras.
+    - One config row per company via unique(company_id); no historical inactive duplicates.
+    - HMAC signs the exact compact UTF-8 JSON bytes transmitted; reuse idempotency key; fresh timestamp/nonce/signature per attempt.
+    - Leave existing MCP demand tool and its tests unchanged.
+    - Reuse llm.group_llm_manager; Odoo 15 APIs only.
+    - Mock outbound HTTP in tests; live signed E2E is not required to close the suite.
+notes: |
+  User authorized run through verify inclusive. Research unselected.
+  Engram MCP unavailable; persist OpenSpec files only.
+  Parent doodba devel.yaml is outside allowedEditRoots.

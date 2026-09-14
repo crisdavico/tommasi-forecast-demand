@@ -1,0 +1,73 @@
+schema: spec-driven
+
+context: |
+  Tech stack: Odoo 15 addon written in Python.
+  Architecture: product.product extension exposing a read-only MCP/LLM tool.
+  Data: sale.order.line demand and stock quantities across all companies.
+  Testing: Odoo TransactionCase integration suite under tests/.
+  Style: typed Python helpers, Odoo ORM conventions, and focused docstrings.
+
+strict_tdd: false
+
+testing:
+  detected: "2026-09-14"
+  strict_tdd_reason: >-
+    The addon repository defines integration tests but no explicit
+    repository-level command that runs the complete test suite.
+  workspace_test_command: null
+  projects:
+    - path: "."
+      stack: "Python; Odoo 15 addon"
+      framework: "Odoo TransactionCase"
+      test_command: null
+      test_layers:
+        unit:
+          available: false
+          tool: null
+        integration:
+          available: true
+          tool: "odoo.tests.common.TransactionCase"
+        e2e:
+          available: false
+          tool: null
+      coverage:
+        available: false
+        command: null
+      quality:
+        linter:
+          available: false
+          command: null
+        type_checker:
+          available: false
+          command: null
+        formatter:
+          available: false
+          command: null
+
+rules:
+  proposal:
+    - Include a rollback plan for changes to the MCP response contract.
+    - Identify compatibility impact when changing schema_version or pagination.
+  specs:
+    - Use Given/When/Then for scenarios.
+    - Use RFC 2119 keywords for normative requirements.
+    - Specify company scope, temporal boundaries, and pagination invariants.
+  design:
+    - Document Odoo ORM, access-control, and query-volume implications.
+    - Include rationale for changes to demand or stock calculations.
+  tasks:
+    - Group work by phase and use hierarchical numbering.
+    - Keep each task completable in one session.
+    - Keep tests with the behavior they verify.
+  apply:
+    guidelines:
+      - Follow existing Odoo model and TransactionCase patterns.
+      - Preserve the documented MCP envelope unless a spec changes it.
+    tdd: false
+    test_command: ""
+  verify:
+    test_command: ""
+    build_command: ""
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive or breaking contract deltas.

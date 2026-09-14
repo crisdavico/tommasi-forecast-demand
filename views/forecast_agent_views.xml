@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="action_server_tommasi_forecast_agent_run_forecast" model="ir.actions.server">
+        <field name="name">Run Forecast</field>
+        <field name="model_id" ref="model_tommasi_forecast_agent_run" />
+        <field name="binding_model_id" ref="model_tommasi_forecast_agent_config" />
+        <field name="binding_view_types">form</field>
+        <field name="state">code</field>
+        <field
+            name="groups_id"
+            eval="[(4, ref('llm.group_llm_manager'))]"
+        />
+        <field name="code">
+run = model.action_run_forecast()
+action = {
+    'name': 'Forecast Agent Run',
+    'type': 'ir.actions.act_window',
+    'res_model': 'tommasi.forecast.agent.run',
+    'view_mode': 'form',
+    'res_id': run.id,
+    'target': 'current',
+    'views': [(False, 'form')],
+}
+        </field>
+    </record>
+
+    <record id="view_tommasi_forecast_agent_config_tree" model="ir.ui.view">
+        <field name="name">tommasi.forecast.agent.config.tree</field>
+        <field name="model">tommasi.forecast.agent.config</field>
+        <field name="arch" type="xml">
+            <tree string="Forecast Agent Config">
+                <field name="company_id" />
+                <field name="active" />
+                <field name="edge_url" />
+                <field name="assistant_id" optional="hide" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_tommasi_forecast_agent_config_form" model="ir.ui.view">
+        <field name="name">tommasi.forecast.agent.config.form</field>
+        <field name="model">tommasi.forecast.agent.config</field>
+        <field name="arch" type="xml">
+            <form string="Forecast Agent Config">
+                <header>
+                    <button
+                        name="%(action_server_tommasi_forecast_agent_run_forecast)d"
+                        type="action"
+                        string="Run Forecast"
+                        class="oe_highlight"
+                    />
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="company_id" />
+                            <field name="active" />
+                            <field name="edge_url" />
+                            <field name="assistant_id" />
+                        </group>
+                        <group>
+                            <field name="api_key" password="True" />
+                            <field name="hmac_secret" password="True" />
+                            <field name="connect_timeout" />
+                            <field name="read_timeout" />
+                            <field name="max_attempts" />
+                            <field name="retry_backoff_seconds" />
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_tommasi_forecast_agent_config_search" model="ir.ui.view">
+        <field name="name">tommasi.forecast.agent.config.search</field>
+        <field name="model">tommasi.forecast.agent.config</field>
+        <field name="arch" type="xml">
+            <search string="Forecast Agent Config">
+                <field name="company_id" />
+                <field name="edge_url" />
+                <filter
+                    string="Archived"
+                    name="inactive"
+                    domain="[('active', '=', False)]"
+                />
+            </search>
+        </field>
+    </record>
+
+    <record id="action_tommasi_forecast_agent_config" model="ir.actions.act_window">
+        <field name="name">Forecast Agent Config</field>
+        <field name="res_model">tommasi.forecast.agent.config</field>
+        <field name="view_mode">tree,form</field>
+        <field
+            name="groups_id"
+            eval="[(4, ref('llm.group_llm_manager'))]"
+        />
+    </record>
+
+    <record id="view_tommasi_forecast_agent_run_tree" model="ir.ui.view">
+        <field name="name">tommasi.forecast.agent.run.tree</field>
+        <field name="model">tommasi.forecast.agent.run</field>
+        <field name="arch" type="xml">
+            <tree
+                string="Forecast Agent Runs"
+                create="false"
+                decoration-info="state == 'queued'"
+                decoration-warning="state in ('running', 'retry')"
+                decoration-success="state == 'completed'"
+                decoration-danger="state == 'failed'"
+            >
+                <field name="name" />
+                <field name="company_id" groups="base.group_multi_company" />
+                <field name="state" />
+                <field name="attempt_count" />
+                <field name="started_at" />
+                <field name="finished_at" />
+                <field name="last_http_status" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_tommasi_forecast_agent_run_form" model="ir.ui.view">
+        <field name="name">tommasi.forecast.agent.run.form</field>
+        <field name="model">tommasi.forecast.agent.run</field>
+        <field name="arch" type="xml">
+            <form string="Forecast Agent Run" create="false" edit="false">
+                <header>
+                    <button
+                        name="%(action_server_tommasi_forecast_agent_run_forecast)d"
+                        type="action"
+                        string="Run Forecast"
+                        class="oe_highlight"
+                    />
+                    <button
+                        name="action_cancel"
+                        type="object"
+                        string="Cancel"
+                        attrs="{'invisible': [('state', 'not in', ('queued', 'running', 'retry'))]}"
+                    />
+                    <button
+                        name="action_retry"
+                        type="object"
+                        string="Retry"
+                        class="oe_highlight"
+                        attrs="{'invisible': [('state', '!=', 'failed')]}"
+                    />
+                    <field
+                        name="state"
+                        widget="statusbar"
+                        statusbar_visible="queued,running,retry,completed,failed"
+                        readonly="1"
+                    />
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Status">
+                            <field name="name" readonly="1" />
+                            <field name="company_id" readonly="1" />
+                            <field name="config_id" readonly="1" />
+                            <field name="idempotency_key" readonly="1" />
+                            <field name="attempt_count" readonly="1" />
+                            <field name="max_attempts" readonly="1" />
+                        </group>
+                        <group string="Timing">
+                            <field name="started_at" readonly="1" />
+                            <field name="finished_at" readonly="1" />
+                            <field name="next_attempt_at" readonly="1" />
+                            <field name="retry_backoff_seconds" readonly="1" />
+                            <field name="read_timeout" readonly="1" />
+                        </group>
+                    </group>
+                    <group string="Diagnostics" col="2">
+                        <field name="last_http_status" readonly="1" />
+                        <field name="last_request_id" readonly="1" />
+                    </group>
+                    <group string="Output">
+                        <field name="last_error" readonly="1" />
+                        <field name="response_payload" readonly="1" />
+                        <field name="request_payload" readonly="1" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_tommasi_forecast_agent_run_search" model="ir.ui.view">
+        <field name="name">tommasi.forecast.agent.run.search</field>
+        <field name="model">tommasi.forecast.agent.run</field>
+        <field name="arch" type="xml">
+            <search string="Forecast Agent Runs">
+                <field name="name" />
+                <field name="idempotency_key" />
+                <field name="company_id" />
+                <field name="state" />
+                <filter
+                    string="Queued"
+                    name="queued"
+                    domain="[('state', '=', 'queued')]"
+                />
+                <filter
+                    string="Running"
+                    name="running"
+                    domain="[('state', '=', 'running')]"
+                />
+                <filter
+                    string="Failed"
+                    name="failed"
+                    domain="[('state', '=', 'failed')]"
+                />
+                <group expand="0" string="Group By">
+                    <filter
+                        string="State"
+                        name="group_state"
+                        context="{'group_by': 'state'}"
+                    />
+                    <filter
+                        string="Company"
+                        name="group_company"
+                        context="{'group_by': 'company_id'}"
+                    />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_tommasi_forecast_agent_run" model="ir.actions.act_window">
+        <field name="name">Forecast Agent Runs</field>
+        <field name="res_model">tommasi.forecast.agent.run</field>
+        <field name="view_mode">tree,form</field>
+        <field
+            name="groups_id"
+            eval="[(4, ref('llm.group_llm_manager'))]"
+        />
+    </record>
+
+    <menuitem
+        id="menu_tommasi_forecast_agent_run"
+        name="Forecast Agent Runs"
+        parent="stock.menu_warehouse_report"
+        action="action_tommasi_forecast_agent_run"
+        sequence="90"
+        groups="llm.group_llm_manager"
+    />
+    <menuitem
+        id="menu_tommasi_forecast_agent_config"
+        name="Forecast Agent Config"
+        parent="stock.menu_warehouse_report"
+        action="action_tommasi_forecast_agent_config"
+        sequence="91"
+        groups="llm.group_llm_manager"
+    />
+    <menuitem
+        id="menu_tommasi_forecast_agent_run_forecast"
+        name="Run Forecast"
+        parent="stock.menu_warehouse_report"
+        action="action_server_tommasi_forecast_agent_run_forecast"
+        sequence="89"
+        groups="llm.group_llm_manager"
+    />
+</odoo>

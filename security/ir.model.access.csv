@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_tommasi_forecast_agent_config_manager,tommasi.forecast.agent.config.manager,model_tommasi_forecast_agent_config,llm.group_llm_manager,1,1,1,1
+access_tommasi_forecast_agent_run_manager,tommasi.forecast.agent.run.manager,model_tommasi_forecast_agent_run,llm.group_llm_manager,1,1,1,1
