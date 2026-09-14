@@ -139,15 +139,16 @@ Forecast agent bridge
 =====================
 
 Queued HMAC ``POST /v1/agent/invoke`` so Inventory managers can run the
-forecast agent without blocking the browser. This addon documents the
-doodba attach snippet; it does **not** edit parent ``devel.yaml``.
+forecast agent without blocking the browser. Local doodba ``devel.yaml``
+attaches ``odoo`` to ``tommasi-forecast-edge`` next to Chatwoot.
 
 Quick path
 ----------
 
 #. Start the forecast-agent Compose stack first so network
-   ``tommasi-forecast-edge`` exists.
-#. Attach doodba ``odoo`` to that network (snippet below). Do not remove
+   ``tommasi-forecast-edge`` exists (``docker compose -f
+   docker-compose.local.yaml up --build``).
+#. Recreate doodba ``odoo`` so it joins that network. Do not remove
    the existing Chatwoot external network.
 #. Upgrade this module to ``15.0.5.0.0``.
 #. Set Edge URL: local ``http://edge-api:8080``, production an HTTPS
@@ -162,10 +163,9 @@ Local Compose snippet
 ---------------------
 
 Modeled on the existing Chatwoot ``external: true`` network
-(``chatwoot_compose`` / ``chatwoot-compose_default``). Add
-``tommasi_forecast_edge`` **alongside** those entries. Parent doodba
-``devel.yaml`` is out of this addon's edit authority — copy the snippet
-when you have a later grant.
+(``chatwoot_compose`` / ``chatwoot-compose_default``). Local
+``devel.yaml`` already lists ``tommasi_forecast_edge`` alongside
+Chatwoot. Other Compose files still need the same attach.
 
 On the ``odoo`` service, keep ``default`` and any existing externals,
 then add::
@@ -259,8 +259,8 @@ Checklist
 ---------
 
 * Forecast-agent stack is up; ``tommasi-forecast-edge`` exists.
-* Doodba ``odoo`` lists ``tommasi_forecast_edge`` next to Chatwoot; parent
-  ``devel.yaml`` was not edited by this addon.
+* Doodba ``odoo`` lists ``tommasi_forecast_edge`` next to Chatwoot in
+  local ``devel.yaml``.
 * Local URL is ``http://edge-api:8080``; production is HTTPS hostname.
 * Edge row has ``streaming_allowed=FALSE``.
 * Secrets rotated with overlap; operators know Odoo stores them
