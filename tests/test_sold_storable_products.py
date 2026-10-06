@@ -278,11 +278,29 @@ class TestSoldStorableProducts(TransactionCase):
                 "qty_available",
                 "periods",
                 "alternative_products",
+                "category_display_name",
             },
+        )
+        self.assertIsInstance(row["category_display_name"], str)
+        self.assertEqual(
+            row["category_display_name"], product.categ_id.display_name or ""
         )
         self.assertEqual(row["id"], product.id)
         self.assertEqual(row["default_code"], product.default_code)
         self.assertEqual(row["name"], product.name)
+
+    def test_category_display_name_is_full_path(self):
+        """Category display name is the internal category complete path."""
+        parent = self.env["product.category"].create({"name": "Vinos"})
+        child = self.env["product.category"].create(
+            {"name": "Tintos", "parent_id": parent.id}
+        )
+        product = self._sold_primary("Sold Tintos", "FD-CAT-TINTO")
+        product.product_tmpl_id.write({"categ_id": child.id})
+        row = self._row_for(product, as_of=FROZEN_AS_OF)
+        self.assertEqual(row["category_display_name"], child.display_name)
+        self.assertIn("Vinos", row["category_display_name"])
+        self.assertTrue(row["category_display_name"].endswith("Tintos"))
 
     def test_consumable_and_service_sold_recently_are_excluded(self):
         """Consumable and service products are excluded even when sold recently."""

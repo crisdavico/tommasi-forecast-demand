@@ -11,6 +11,9 @@ now summed across all companies. Version ``15.0.6.0.0`` is additive:
 ``schema_version`` stays ``1`` and each product row includes nested
 ``alternative_products``. The forecast agent treats that list as
 informational only (buy math still uses primary ``qty_available``).
+Version ``15.0.6.5.0`` adds string ``category_display_name`` (the
+internal category display name, full path). ``schema_version`` stays
+``1``. An empty string means the category has no display name.
 
 Depends
 =======
@@ -51,6 +54,7 @@ A JSON object (not a bare list)::
           "id": 1,
           "default_code": "SKU",
           "name": "Name",
+          "category_display_name": "All / Vinos / Tintos",
           "qty_available": 10.0,
           "alternative_products": [
             {
@@ -100,6 +104,9 @@ Periods and stock
 * ``alternative_products`` is a list (possibly empty) of directional
   website_sale templates. Each item is ``{id, name, skus, qty_available}``.
   There are no nested ``periods``. ``schema_version`` stays ``1``.
+* ``category_display_name`` is a string: ``product.categ_id`` display
+  name (``complete_name``, the full path). ``""`` when that name is
+  blank. It does not change eligibility, demand, or stock.
 
 Alternative products
 --------------------
@@ -132,7 +139,7 @@ Pagination
 Configuration
 =============
 
-#. Install or upgrade this module (``15.0.6.0.0``).
+#. Install or upgrade this module (``15.0.6.5.0``).
 #. The tool appears on ``/mcp`` ``tools/list``. Restart the worker if needed.
 
 Forecast agent bridge

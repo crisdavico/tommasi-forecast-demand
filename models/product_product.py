@@ -243,6 +243,21 @@ class ProductProduct(models.Model):
                     break
         return demand
 
+    @staticmethod
+    def _category_display_name(product):
+        """Return the internal category display name, or ``""`` when blank.
+
+        ``product.category`` uses ``complete_name`` as its display name, so
+        the value is the full path (for example ``All / Vinos / Tintos``).
+        """
+        category = product.categ_id
+        if not category:
+            return ""
+        name = category.display_name
+        if not name:
+            return ""
+        return str(name).strip()
+
     def _product_envelope_row(
         self,
         product,
@@ -258,6 +273,7 @@ class ProductProduct(models.Model):
             "id": product_id,
             "default_code": product.default_code,
             "name": product.name,
+            "category_display_name": self._category_display_name(product),
             "qty_available": live_qty[product_id],
             "periods": [
                 {
